@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 PORTAL RAHASIA - Akses Dokumen Klasifikasi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .container {
+            background: rgba(0, 20, 0, 0.95);
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+            position: relative;
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #0f0, #003300, #0f0);
+            z-index: -1;
+            border-radius: 10px;
+            animation: borderRotate 3s linear infinite;
+        }
+
+        @keyframes borderRotate {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #0f0;
+        }
+
+        .header p {
+            color: #0a0;
+            font-size: 0.9em;
+        }
+
+        .warning-box {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #f00;
+            color: #f00;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 0.8em;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #001100;
+            border: 1px solid #0f0;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            box-shadow: 0 0 10px #0f0;
+            background: #002200;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #0f0;
+            color: #000;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #00ff00;
+            box-shadow: 0 0 20px #0f0;
+            transform: translateY(-2px);
+        }
+
+        .hidden-content {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 50, 0, 0.8);
+            border: 1px solid #0f0;
+            border-radius: 5px;
+        }
+
+        .hidden-content h2 {
+            color: #0f0;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .secret-link {
+            display: inline-block;
+            background: #0f0;
+            color: #000;
+            padding: 15px 30px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 15px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .secret-link:hover {
+            background: #00ff00;
+            box-shadow: 0 0 20px #0f0;
+        }
+
+        .error-msg {
+            color: #f00;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .hint-box {
+            background: rgba(255, 255, 0, 0.1);
+            border: 1px solid #ff0;
+            color: #ff0;
+            padding: 10px;
+            margin-top: 20px;
+            font-size: 0.8em;
+            display: none;
+        }
+
+        .terminal-line {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        .typing {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 3s steps(40, end);
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        .success-animation {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .lock-icon {
+            font-size: 3em;
+            animation: unlock 1s ease-out;
+        }
+
+        @keyframes unlock {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrix"></canvas>
+
+    <div class="container">
+        <div class="header">
+            <h1>🔐 SERVER AMAN</h1>
+            <p>SISTEM DOKUMEN KLASIFIKASI - LEVEL 5</p>
+        </div>
+
+        <div class="warning-box">
+            ⚠️ PERINGATAN: AKSES TANPA IZIN AKAN DILACAK ⚠️<br>
+            IP ADDRESS: <span id="ip-display">192.168.X.XXX</span>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label>👤 Username:</label>
+                <input type="text" id="username" placeholder="Masukkan username..." autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label>🔑 Password:</label>
+                <input type="password" id="password" placeholder="Masukkan password...">
+            </div>
+
+            <button type="submit">🔓 AKSES SISTEM</button>
+        </form>
+
+        <div class="error-msg" id="errorMsg">
+            ❌ AKSES DITOLAK - KREDENSIAL SALAH
+        </div>
+
+        <div class="hint-box" id="hintBox">
+            💡 PETUNJUK: Cek source code halaman ini atau lihat konsol browser (F12) untuk petunjuk tersembunyi...
+        </div>
+
+        <div class="success-animation" id="successAnim">
+            <div class="lock-icon">🔓</div>
+            <p>AKSES DITERIMA!</p>
+        </div>
+
+        <div class="hidden-content" id="secretContent">
+            <h2>🎯 DOKUMEN RAHASIA TERBUKA</h2>
+            <div class="terminal-line">> Verifikasi identitas: BERHASIL</div>
+            <div class="terminal-line">> Dekripsi file: COMPLETE</div>
+            <div class="terminal-line">> Lokasi target: DITEMUKAN</div>
+            <div class="terminal-line">> Status: SIAP DIUNDUH</div>
+            
+            <p style="margin-top: 15px; text-align: center;">
+                <strong>Anggelina Felicia ditemukan di lokasi berikut:</strong><br>
+                Koordinat rahasia telah terdekripsi.
+            </p>
+
+            <center>
+                <a href="https://maps.google.com/?q=-6.832853,107.605643
+" class="secret-link" target="_blank">
+                    🗺️ BUKA LOKASI GOOGLE MAPS
+                </a>
+            </center>
+
+            <div style="margin-top: 20px; padding: 10px; background: rgba(0,0,0,0.5); border-radius: 5px; font-size: 0.8em;">
+                <strong>Catatan Investigator:</strong><br>
+                "Ini adalah akhir dari petualangan. Selamat telah memecahkan teka-teki ini. Anggelina menunggu di lokasi tersebut."
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Matrix background effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+
+        for (let i = 0; i < columns; i++) {
+            drops[i] = 1;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#0f0';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 35);
+
+        // Random IP display
+        document.getElementById('ip-display').textContent = 
+            '192.168.' + Math.floor(Math.random() * 256) + '.' + Math.floor(Math.random() * 256);
+
+        // ============================================
+        // KREDENSIAL RAHASIA - Teka-teki Solver
+        // Petunjuk: Username adalah "admin" 
+        // Password adalah "bandung2026" (kota kejadian + tahun)
+        // ============================================
+        const CORRECT_USERNAME = 'admin';
+        const CORRECT_PASSWORD = 'bandung2026';
+        // ============================================
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+            const hintBox = document.getElementById('hintBox');
+            const successAnim = document.getElementById('successAnim');
+            const secretContent = document.getElementById('secretContent');
+
+            // Simulasi loading
+            const btn = this.querySelector('button');
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ MEMVERIFIKASI...';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                if (username === CORRECT_USERNAME && password === CORRECT_PASSWORD) {
+                    // Sukses!
+                    errorMsg.style.display = 'none';
+                    hintBox.style.display = 'none';
+                    document.getElementById('loginForm').style.display = 'none';
+                    successAnim.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        secretContent.style.display = 'block';
+                        secretContent.scrollIntoView({ behavior: 'smooth' });
+                    }, 1000);
+                } else {
+                    // Gagal
+                    errorMsg.style.display = 'block';
+                    hintBox.style.display = 'block';
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    
+                    // Efek shake
+                    document.querySelector('.container').style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        document.querySelector('.container').style.animation = '';
+                    }, 500);
+                }
+            }, 1500);
+        });
+
+        // Easter egg: Konami code
+        let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 
+                          'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 
+                          'b', 'a'];
+        let konamiIndex = 0;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    alert('🎮 Cheat Code Activated!\nPetunjuk: Username = admin, Password = bandung2026');
+                    konamiIndex = 0;
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        });
+
+        // Console log petunjuk
+        console.log('%c🔍 PETUNJUK TERSEMBUNYI 🔍', 'color: #0f0; font-size: 20px; font-weight: bold;');
+        console.log('%cCek variabel CORRECT_USERNAME dan CORRECT_PASSWORD di source code!', 'color: #ff0;');
+        console.log('%cAtau gunakan Konami Code: ↑↑↓↓←→←→BA', 'color: #0ff;');
+    </script>
+
+    <style>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    </style>
+</body>
+</html>
